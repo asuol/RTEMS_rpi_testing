@@ -5,130 +5,148 @@
 #include <rtems/test.h>
 
 #include <bsp.h> /* for device driver prototypes */
+#include <bsp/gpio.h>
 
-#include <bsp/gpio.h> /* Calls the BSP gpio library */
-#include <rtems/status-checks.h>
-
-#include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 
 /* forward declarations to avoid warnings */
-rtems_task Init(rtems_task_argument argument);
+rtems_task test(rtems_task_argument ignored);
+rtems_task Init(rtems_task_argument ignored);
 
-void edge_test_1(void);
-void edge_test_2(void);
-void level_test(void);
+rtems_gpio_irq_state edge_test_1(void * arg);
+rtems_gpio_irq_state edge_test_2(void * arg);
+rtems_gpio_irq_state level_test(void * arg);
+
+uint32_t led1, led2;
+uint32_t sw1, sw2;
 
 const char rtems_test_name[] = "LIBGPIO_TEST_IRQ";
 
-void edge_test_1(void)
+rtems_gpio_irq_state edge_test_1(void *arg)
 {
-  int rv;
+  rtems_status_code sc;
+  int pin_number;
   int val;
-  
-  val = gpio_get_val(2);
 
-  if ( val == 0 )
-  {
-    rv = gpio_set(3);
-    RTEMS_CHECK_RV(rv, "gpio_set");
+  pin_number = *((int*) arg);
+  
+  printk("\nisr: pin %d\n", pin_number);
+  
+  val = rtems_gpio_get_value(sw1);
+
+  if ( val == 0 ) {
+    sc = rtems_gpio_set(led1);
+    assert(sc == RTEMS_SUCCESSFUL);
   }
-  else
-  {
-    rv = gpio_clear(3);
-    RTEMS_CHECK_RV(rv, "gpio_clear");
+  else {
+    sc = rtems_gpio_clear(led1);
+    assert(sc == RTEMS_SUCCESSFUL);
   }
+
+  return IRQ_HANDLED;
 }
 
-void edge_test_2(void)
+rtems_gpio_irq_state edge_test_2(void *arg)
 {
-  int rv;
+  rtems_status_code sc;
+  int pin_number;
   int val;
+
+  pin_number = *((int*) arg);
   
-  val = gpio_get_val(17);
+  printk("\nisr: pin %d\n", pin_number);
+  
+  val = rtems_gpio_get_value(sw2);
 
-  if ( val == 0 )
-  {
-    rv = gpio_set(7);
-    RTEMS_CHECK_RV(rv, "gpio_set");
+  if ( val == 0 ) {
+    sc = rtems_gpio_set(led2);
+    assert(sc == RTEMS_SUCCESSFUL);
   }
-  else
-  {
-    rv = gpio_clear(7);
-    RTEMS_CHECK_RV(rv, "gpio_clear");
+  else {
+    sc = rtems_gpio_clear(led2);
+    assert(sc == RTEMS_SUCCESSFUL);
   }
+
+  return IRQ_HANDLED;
 }
 
-void level_test(void)
+rtems_task test(rtems_task_argument ignored)
 {
-  printk("\nLED ON!\n");
-}
+  rtems_status_code sc;
 
-rtems_task Init(
-  rtems_task_argument ignored
-)
-{
-  rtems_interval ticks = 0;
-  int rv = 0;
-
-  ticks = rtems_clock_get_ticks_per_second();
-
+  /* Pin numbers. */
+  led1 = 3;
+  led2 = 18;
+  sw1 = 7;
+  sw2 = 2;
+  
   rtems_test_begin ();
 
   /* Initializes the GPIO API */
-  gpio_initialize ();
+  sc = rtems_gpio_initialize ();
+  assert(sc == RTEMS_SUCCESSFUL);
   
-  rv = gpio_select_pin (3, DIGITAL_OUTPUT);
-  RTEMS_CHECK_RV (rv, "gpio_select_pin output");
-  
-  rv = gpio_select_pin (7, DIGITAL_OUTPUT);
-  RTEMS_CHECK_RV (rv, "gpio_select_pin output");
-  
-  rv = gpio_clear (3);
-  RTEMS_CHECK_RV(rv, "gpio_clear");
-  
-  rv = gpio_clear (7);
-  RTEMS_CHECK_RV(rv, "gpio_clear");
-  
-  rv = gpio_select_pin (2, DIGITAL_INPUT);
-  RTEMS_CHECK_RV(rv, "gpio_select_pin input");
-  
-  rv = gpio_select_pin (17, DIGITAL_INPUT);
-  RTEMS_CHECK_RV(rv, "gpio_select_pin input");
+  sc = rtems_gpio_request_pin (led1, DIGITAL_OUTPUT, false, false, NULL);
+  assert(sc == RTEMS_SUCCESSFUL);
 
-  /* Enables the internal pull up resistor on the GPIO 2 pin */
-  rv = gpio_input_mode (2, PULL_UP);
-  RTEMS_CHECK_RV(rv, "gpio_input_mode");
+  sc = rtems_gpio_request_pin (led2, DIGITAL_OUTPUT, false, false,  NULL);
+  assert(sc == RTEMS_SUCCESSFUL);
+
+  sc = rtems_gpio_request_pin (sw1, DIGITAL_INPUT, false, false, NULL);
+  assert(sc == RTEMS_SUCCESSFUL);
+
+  sc = rtems_gpio_request_pin (sw2, DIGITAL_INPUT, false, false, NULL);
+  assert(sc == RTEMS_SUCCESSFUL);
+
+  /* Enables the internal pull up resistor on the first switch. */
+  sc = rtems_gpio_resistor_mode (sw1, PULL_UP);
+  assert(sc == RTEMS_SUCCESSFUL);
   
-  /* Enables the internal pull up resistor on the GPIO 8 pin */
-  rv = gpio_input_mode (17, PULL_UP);
-  RTEMS_CHECK_RV(rv, "gpio_input_mode");
-  
-  /* Debouces gpio pin 2 switch by requiring ~50 miliseconds between interrupts */
-  rv = gpio_debounce_switch (2, (ticks * 0.05));
-  RTEMS_CHECK_RV(rv, "gpio_debounce_switch");
+  /* Enables the internal pull up resistor on the second switch. */
+  sc = rtems_gpio_resistor_mode (sw2, PULL_UP);
+  assert(sc == RTEMS_SUCCESSFUL);
 
   /* Enable interrupts, and assign handler functions */ 
-  rv = gpio_enable_interrupt (2, BOTH_EDGES, edge_test_1);
-  RTEMS_CHECK_RV(rv, "gpio_enable_interrupt");
-  
-  rv = gpio_enable_interrupt (17, BOTH_EDGES, edge_test_2);
-  RTEMS_CHECK_RV(rv, "gpio_enable_interrupt");
-  
-  rv = gpio_enable_interrupt (7, HIGH_LEVEL, level_test);
-  RTEMS_CHECK_RV(rv, "gpio_enable_interrupt");
-  
+  sc = rtems_gpio_enable_interrupt (sw1, BOTH_EDGES, UNIQUE_HANDLER, edge_test_1, &sw1);
+  assert(sc == RTEMS_SUCCESSFUL);
+
+  sc = rtems_gpio_enable_interrupt (sw2, BOTH_EDGES, UNIQUE_HANDLER, edge_test_2, &sw2);
+  assert(sc == RTEMS_SUCCESSFUL);
+
   /* Keeps the program running, so interrupts can be tested */
   while (1);
   
-  rtems_test_end ();
-  exit ( 0 );
+  rtems_test_end();
+  exit(0);
+}
+
+rtems_task Init(rtems_task_argument ignored)
+{
+  rtems_status_code sc;
+  rtems_id task_id = RTEMS_ID_NONE;
+
+  sc = rtems_task_create(rtems_build_name( 'T', 'E', 'S', 'T' ),
+			 10,
+			 0,
+			 RTEMS_DEFAULT_MODES,
+			 RTEMS_DEFAULT_ATTRIBUTES,&task_id);
+
+  assert(sc == RTEMS_SUCCESSFUL);
+  
+  sc = rtems_task_start(task_id, test, 0);
+
+  assert(sc == RTEMS_SUCCESSFUL);
+
+  rtems_task_delete( RTEMS_SELF ) ;
 }
 
 #define CONFIGURE_APPLICATION_NEEDS_CLOCK_DRIVER
 #define CONFIGURE_APPLICATION_NEEDS_CONSOLE_DRIVER
 
-#define CONFIGURE_MAXIMUM_TASKS            1
+#define CONFIGURE_MAXIMUM_TASKS 5
+#define CONFIGURE_EXTRA_TASK_STACKS (4 * RTEMS_MINIMUM_STACK_SIZE)
+
 #define CONFIGURE_USE_DEVFS_AS_BASE_FILESYSTEM
 
 #define CONFIGURE_RTEMS_INIT_TASKS_TABLE

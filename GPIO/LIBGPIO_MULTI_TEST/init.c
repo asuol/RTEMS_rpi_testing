@@ -12,73 +12,60 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "rpi-conf.c"
+
 /* forward declarations to avoid warnings */
 rtems_task Init(rtems_task_argument argument);
 
-const char rtems_test_name[] = "LIBGPIO_TEST";
+const char rtems_test_name[] = "LIBGPIO_MULTI_TEST";
 
 rtems_task Init(
   rtems_task_argument ignored
 )
 {
   rtems_status_code sc;
-  uint32_t led1, led2;
-  uint32_t sw1, sw2;
   int val;
-
-  led1 = 3;
-  led2 = 18;
-  sw1 = 7;
-  sw2 = 2;
   
   rtems_test_begin ();
   
   /* Initializes the GPIO API */
   rtems_gpio_initialize ();
   
-  sc = rtems_gpio_request_pin(led1, DIGITAL_OUTPUT, false, false, NULL);
+  sc = rtems_gpio_request_conf(&led1);
   assert(sc == RTEMS_SUCCESSFUL);
 
-  sc = rtems_gpio_request_pin(led2, DIGITAL_OUTPUT, false, false, NULL);
+  sc = rtems_gpio_request_conf(&led2);
   assert(sc == RTEMS_SUCCESSFUL);
 
-  sc = rtems_gpio_request_pin(sw1, DIGITAL_INPUT, false, false, NULL);
+  sc = rtems_gpio_request_conf(&sw1);
   assert(sc == RTEMS_SUCCESSFUL);
 
-  sc = rtems_gpio_request_pin(sw2, DIGITAL_INPUT, false, false, NULL);
-  assert(sc == RTEMS_SUCCESSFUL);
-
-  /* Enables the internal pull up resistor on the first switch, */
-  sc = rtems_gpio_resistor_mode(sw1, PULL_UP);
-  assert(sc == RTEMS_SUCCESSFUL);
-
-  /* Enables the internal pull up resistor on the second switch. */
-  sc = rtems_gpio_resistor_mode(sw2, PULL_UP);
+  sc = rtems_gpio_request_conf(&sw2);
   assert(sc == RTEMS_SUCCESSFUL);
 
   /* Polls the two switches. */
   while ( 1 ) {
-    val = rtems_gpio_get_value(sw1);
+    val = rtems_gpio_get_value(sw1.pin_number);
 
      if ( val == 0 ) {
-      sc = rtems_gpio_set(led2);
+      sc = rtems_gpio_set(led2.pin_number);
       assert(sc == RTEMS_SUCCESSFUL);
     }
 
     else {
-      sc = rtems_gpio_clear(led2);
+      sc = rtems_gpio_clear(led2.pin_number);
       assert(sc == RTEMS_SUCCESSFUL);
     }
 
-    val = rtems_gpio_get_value(sw2);
+    val = rtems_gpio_get_value(sw2.pin_number);
 
     if ( val == 0 ) {
-      sc = rtems_gpio_set(led1);
+      sc = rtems_gpio_set(led1.pin_number);
       assert(sc == RTEMS_SUCCESSFUL);
     }
 
     else {
-      sc = rtems_gpio_clear(led1);
+      sc = rtems_gpio_clear(led1.pin_number);
       assert(sc == RTEMS_SUCCESSFUL);
     }
   }
