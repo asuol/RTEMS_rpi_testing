@@ -50,13 +50,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-rtems_tests_PROGRAMS = LIBGPIO_TEST$(EXEEXT)
+rtems_tests_PROGRAMS = LIBGPIO_JTAG$(EXEEXT)
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/../../depcomp \
 	$(top_srcdir)/../automake/compile.am \
 	$(top_srcdir)/../automake/leaf.am \
 	$(top_srcdir)/../automake/local.am
-subdir = LIBGPIO_TEST
+subdir = LIBGPIO_JTAG
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps =  \
 	$(top_srcdir)/../aclocal/canonical-target-name.m4 \
@@ -80,9 +80,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(rtems_testsdir)"
 PROGRAMS = $(rtems_tests_PROGRAMS)
-am_LIBGPIO_TEST_OBJECTS = init.$(OBJEXT)
-LIBGPIO_TEST_OBJECTS = $(am_LIBGPIO_TEST_OBJECTS)
-LIBGPIO_TEST_LDADD = $(LDADD)
+am_LIBGPIO_JTAG_OBJECTS = init.$(OBJEXT)
+LIBGPIO_JTAG_OBJECTS = $(am_LIBGPIO_JTAG_OBJECTS)
+LIBGPIO_JTAG_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../../depcomp
 am__depfiles_maybe = depfiles
@@ -91,8 +91,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(LIBGPIO_TEST_SOURCES)
-DIST_SOURCES = $(LIBGPIO_TEST_SOURCES)
+SOURCES = $(LIBGPIO_JTAG_SOURCES)
+DIST_SOURCES = $(LIBGPIO_JTAG_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -226,15 +226,15 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-LIBGPIO_TEST_SOURCES = init.c
+LIBGPIO_JTAG_SOURCES = init.c
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 AM_CXXFLAGS = 
 CLEANFILES = *.num *.nxe *.elf *.srec* *.bin *.bt *.ralf
 CXXLINK_APP = $(CXXLINK) $(LDLIBS) $(LINK_OBJS) $(LINK_LIBS)
 LINK_APP = $(LINK) $(LDLIBS) $(LINK_OBJS) $(LINK_LIBS)
-LINK_OBJS = $(LIBGPIO_TEST_OBJECTS)
-LINK_LIBS = $(LIBGPIO_TEST_LDLIBS)
+LINK_OBJS = $(LIBGPIO_JTAG_OBJECTS)
+LINK_LIBS = $(LIBGPIO_JTAG_LDLIBS)
 PROJECT_TOOLS = $(PROJECT_RELEASE)/build-tools
 all: all-am
 
@@ -249,9 +249,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign LIBGPIO_TEST/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign LIBGPIO_JTAG/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign LIBGPIO_TEST/Makefile
+	  $(AUTOMAKE) --foreign LIBGPIO_JTAG/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -554,8 +554,8 @@ uninstall-am: uninstall-rtems_testsPROGRAMS
 	uninstall-am uninstall-rtems_testsPROGRAMS
 
 
-#dist_rtems_tests_DATA = LIBGPIO_TEST.scn
-#dist_rtems_tests_DATA += LIBGPIO_TEST.doc
+#dist_rtems_tests_DATA = LIBGPIO_JTAG.scn
+#dist_rtems_tests_DATA += LIBGPIO_JTAG.doc
 
 include $(RTEMS_ROOT)/make/custom/@RTEMS_BSP@.cfg
 include $(RTEMS_ROOT)/make/leaf.cfg
@@ -570,8 +570,8 @@ define make-exe
 endef
 @ENDIF@
 
-LIBGPIO_TEST$(EXEEXT): $(LIBGPIO_TEST_OBJECTS) $(LIBGPIO_TEST_DEPENDENCIES)
-	@rm -f LIBGPIO_TEST$(EXEEXT)
+LIBGPIO_JTAG$(EXEEXT): $(LIBGPIO_JTAG_OBJECTS) $(LIBGPIO_JTAG_DEPENDENCIES)
+	@rm -f LIBGPIO_JTAG$(EXEEXT)
 	$(make-exe)
 preinstall:
 .PHONY: preinstall

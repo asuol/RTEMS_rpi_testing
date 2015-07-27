@@ -5,9 +5,7 @@
 #include <rtems/test.h>
 
 #include <bsp.h> /* for device driver prototypes */
-
 #include <bsp/gpio.h>
-#include <rtems/status-checks.h>
 
 #include <assert.h>
 #include <stdlib.h>

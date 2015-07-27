@@ -9,56 +9,41 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "rpi-conf.c"
 
 /* forward declarations to avoid warnings */
 rtems_task Init(rtems_task_argument argument);
 
-const char rtems_test_name[] = "LIBGPIO_MULTI_TEST";
+const char rtems_test_name[] = "LIBGPIO_TEST_GROUP";
 
 rtems_task Init(
   rtems_task_argument ignored
 )
 {
   rtems_status_code sc;
-  int val;
+  rtems_gpio_group *group;
 
   rtems_test_begin ();
-
+  
   /* Initializes the GPIO API */
   rtems_gpio_initialize ();
 
-  sc = rtems_gpio_multi_select(test, 4);
+  group = rtems_gpio_create_pin_group();
+
+  sc = rtems_gpio_define_pin_group(&test_group, group);
   assert(sc == RTEMS_SUCCESSFUL);
 
-  /* Polls the two switches. */
-  while ( 1 ) {
-    val = rtems_gpio_get_value(sw1_pin);
+  /* 0x1 lits the first LED
+   * 0x2 lits the second LED
+   * 0x3 lits both LEDs */
+  sc = rtems_gpio_write_group(0x3, group);
+  assert(sc == RTEMS_SUCCESSFUL);
 
-     if ( val == 0 ) {
-      sc = rtems_gpio_set(led2_pin);
-      assert(sc == RTEMS_SUCCESSFUL);
-    }
-
-    else {
-      sc = rtems_gpio_clear(led2_pin);
-      assert(sc == RTEMS_SUCCESSFUL);
-    }
-
-     val = rtems_gpio_get_value(sw2_pin);
-
-    if ( val == 0 ) {
-      sc = rtems_gpio_set(led1_pin);
-      assert(sc == RTEMS_SUCCESSFUL);
-    }
-
-    else {
-      sc = rtems_gpio_clear(led1_pin);
-      assert(sc == RTEMS_SUCCESSFUL);
-    }
-  }
-
+  sc = rtems_gpio_release_pin_group(group);
+  assert(sc == RTEMS_SUCCESSFUL);
+  
   rtems_test_end();
   exit(0);
 }
