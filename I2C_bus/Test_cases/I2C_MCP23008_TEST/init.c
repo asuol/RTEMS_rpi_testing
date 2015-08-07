@@ -22,60 +22,65 @@ rtems_task Init(rtems_task_argument argument);
 
 const char rtems_test_name[] = "I2C_MCP23008_TEST";
 
-rtems_task Init(
-  rtems_task_argument ignored
-)
+rtems_task Init(rtems_task_argument ignored)
 {
   int rv = 0;
   int val;
   int fd;
 
   rtems_test_begin ();
-  
+
+  rv = rpi_setup_i2c_bus();
+  assert ( rv == 0 );
+
+  rv = i2c_dev_register_mcp23008(
+         "/dev/i2c",
+         "/dev/i2c.mcp23008",
+         MCP23008_ADDR
+       );
+
+  assert ( rv == 0 );
+
   /* Open the mcp23008 device file */
   fd = open("/dev/i2c.mcp23008", O_RDWR);
   RTEMS_CHECK_RV(rv, "Open /dev/i2c.mcp23008");
-  
+
   /* Set the mcp23008 gpio pin 4 as an output */
-  rv = ioctl(fd, MCP23008_CONF_OUTPUT, 4);
+  rv = ioctl(fd, MCP23008_CONF_OUTPUT, (void *)(uintptr_t) 4);
   RTEMS_CHECK_RV(rv, "mcp23008 gpio conf output");
 
   /* Set the LED connected to the mcp23008 gpio pin 4 off */
-  rv = ioctl(fd, MCP23008_CLEAR_OUTPUT, 4);
+  rv = ioctl(fd, MCP23008_CLEAR_OUTPUT, (void *)(uintptr_t)4);
   RTEMS_CHECK_RV(rv, "mcp23008 gpio clear output");
 
   /* Set the mcp23008 gpio pin 2 as an input */
-  rv = ioctl(fd, MCP23008_CONF_INPUT, 2);
+  rv = ioctl(fd, MCP23008_CONF_INPUT, (void *)(uintptr_t) 2);
   RTEMS_CHECK_RV(rv, "mcp23008 gpio conf input");
 
   /* Enable the mcp23008 gpio pin 2 pull up */
-  rv = ioctl(fd, MCP23008_SET_PULLUP, 2);
+  rv = ioctl(fd, MCP23008_SET_PULLUP, (void *)(uintptr_t) 2);
   RTEMS_CHECK_RV(rv, "mcp23008 gpio set pullup");
 
   /* Polls forever the buton conected to the mcp23008 gpio pin 2,
    * and lights the LED connected to the mcp23008 gpio pin 4 when the button is pressed.
    */
-  while(1)
-  {
-    val = ioctl(fd, MCP23008_READ_INPUT, 2);
- 
-    if ( val == 0 )
-    {
-      rv = ioctl(fd, MCP23008_SET_OUTPUT, 4);
+  while ( 1 ) {
+    val = ioctl(fd, MCP23008_READ_INPUT, (void *)(uintptr_t) 2);
+
+    if ( val == 0 ) {
+      rv = ioctl(fd, MCP23008_SET_OUTPUT, (void *)(uintptr_t) 4);
       RTEMS_CHECK_RV(rv, "mcp23008 gpio set output");
     }
-
-    else
-    {
-      rv = ioctl(fd, MCP23008_CLEAR_OUTPUT,4);
+    else {
+      rv = ioctl(fd, MCP23008_CLEAR_OUTPUT, (void *)(uintptr_t) 4);
       RTEMS_CHECK_RV(rv, "mcp23008 gpio clear output");
     }
   }
- 
+
   rv = close(fd);
   RTEMS_CHECK_RV(rv, "Close /dev/i2c.mcp23008");
 
-  rtems_test_end ();
+  rtems_test_end();
   exit ( 0 );
 }
 
@@ -85,7 +90,7 @@ rtems_task Init(
 
 #define CONFIGURE_USE_IMFS_AS_BASE_FILESYSTEM
 
-#define CONFIGURE_MAXIMUM_SEMAPHORES 3
+#define CONFIGURE_MAXIMUM_SEMAPHORES 10
 
 #define CONFIGURE_RTEMS_INIT_TASKS_TABLE
 
