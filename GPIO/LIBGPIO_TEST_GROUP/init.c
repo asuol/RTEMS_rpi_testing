@@ -25,10 +25,11 @@ rtems_task Init(
   rtems_status_code sc;
   rtems_gpio_group *group;
 
-  rtems_test_begin ();
+  rtems_test_begin();
   
   /* Initializes the GPIO API */
-  rtems_gpio_initialize ();
+  sc = rtems_gpio_initialize();
+  assert(sc == RTEMS_SUCCESSFUL);
 
   group = rtems_gpio_create_pin_group();
 

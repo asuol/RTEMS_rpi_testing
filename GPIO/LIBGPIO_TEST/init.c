@@ -28,12 +28,13 @@ rtems_task Init(
   led2 = 18;
   sw1 = 7;
   sw2 = 2;
-  
+
   rtems_test_begin ();
-  
+
   /* Initializes the GPIO API */
-  rtems_gpio_initialize ();
-  
+  sc = rtems_gpio_initialize ();
+  assert(sc == RTEMS_SUCCESSFUL);
+
   sc = rtems_gpio_request_pin(led1, DIGITAL_OUTPUT, false, false, NULL);
   assert(sc == RTEMS_SUCCESSFUL);
 

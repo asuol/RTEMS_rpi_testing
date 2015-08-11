@@ -83,7 +83,8 @@ rtems_task Init(
   rtems_test_begin();
 
   /* Initializes the GPIO API */
-  rtems_gpio_initialize();
+  sc = rtems_gpio_initialize();
+  assert(sc == RTEMS_SUCCESSFUL);
 
   sc = rtems_gpio_multi_select(test, 4);
   assert(sc == RTEMS_SUCCESSFUL);
