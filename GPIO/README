@@ -1,0 +1,15 @@
+All of these tests use the same circuit requiring two switches and two leds.
+
+The circuit I used can be seen in https://asuolgsoc2014.files.wordpress.com/2014/08/circuit3.png?w=700
+
+These tests poll the switches or wait for an interrupt to lit the LEDs accordingly, with some variations (i.e.: the group test does not require the switches).
+
+- LIBGPIO_MULTI_TEST - Uses a configuration table to configure the pins, polling the switches;
+- LIBGPIO_MULTI_TEST_IRQ - Uses a configuration table to configure the pins with interrupts on both edges for both switches;
+- LIBGPIO_TEST - Uses direct API calls to poll the two switches;
+- LIBGPIO_TEST_IRQ - Uses direct API calls to enable interrupts on both edges of the switches;
+- LIBGPIO_TEST_GROUP - Defines a group with a output pin set, and writes a value to the group. This lits the LEDs accordingly to the value written.
+
+The following test case is raspberry pi specific:
+
+LIBGPIO_JTAG - Setups the JTAG pin interface on the raspberry pi. More information on JTAG and the PI can be seen in my blog in https://asuolgsoc2014.wordpress.com/2015/07/14/jtag-code-loading-and-debugging/

@@ -3,6 +3,7 @@ RTEMS_rpi_testing
 
 Test cases and drivers for the Raspberry Pi BSP on RTEMS.
 
+Documentation from 2015 GSOC can be found in https://devel.rtems.org/wiki/GSoC/2015/RaspberryPi_peripherals_and_SD_card
 Documentation from 2014 GSOC can be found in https://devel.rtems.org/wiki/GSoC/2013/Raspberry_Pi_BSP_Peripherals
 
 GPIO - Test cases for the Raspberry Pi GPIO API.

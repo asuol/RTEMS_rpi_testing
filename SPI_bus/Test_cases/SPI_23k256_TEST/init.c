@@ -33,7 +33,7 @@ rtems_task Init(rtems_task_argument ignored)
 
   rtems_test_begin ();
 
-  spi_bus = rpi_spi_init();
+  spi_bus = rpi_spi_init(false);
   assert ( spi_bus >= 0 );
 
   rv = spi_libi2c_register_23k256(spi_bus);

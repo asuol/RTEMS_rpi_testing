@@ -1,0 +1,9 @@
+*** BEGIN OF TEST SPI_23k256_TEST ***
+
+Wrote 104 chars
+
+Read 104 chars
+
+Read data -> This message confirms that RTEMS can send and receive data using the SPI bus to the 23k256 SRAM device!
+
+*** END OF TEST SPI_23k256_TEST ***

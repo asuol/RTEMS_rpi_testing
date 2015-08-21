@@ -1,0 +1,3 @@
+The wiring circuit scheme used with the mcp23008 can be seen at https://asuolgsoc2014.files.wordpress.com/2014/08/i2c2.png?w=700
+
+Problems may arise if the wire connecting the Pi and the device is longer that 20cm.
