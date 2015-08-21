@@ -1,3 +1,5 @@
+The device driver is to be put in the libchip/I2C RTEMS directory, and must also be referred in the libchip Makefile.
+
 The wiring circuit scheme used with the 23k256 can be seen at https://asuolgsoc2014.files.wordpress.com/2014/08/spi3.png?w=700
 
 Problems may arise if the wire connecting the Pi and the device is longer that 20cm.
